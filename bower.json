@@ -1,0 +1,29 @@
+{
+  "name": "Neighborhood_Map",
+  "homepage": "https://github.com/bohulenkov14/Neighbourhood_Map",
+  "description": "Google map integration project",
+  "main": "index.html",
+  "moduleType": [],
+  "keywords": [
+    "udacity",
+    "knockout",
+    "google",
+    "maps"
+  ],
+  "authors": [
+    "Bohulenkov A.S."
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "knockout": "~3.3.0",
+    "jquery": "~2.1.4"
+  }
+}
