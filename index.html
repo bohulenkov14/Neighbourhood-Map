@@ -19,7 +19,13 @@
 			<input class="search-area" data-bind="value:neighborhood">
 		</div>
 
-		<div class="places"></div>
+		<div class="places" data-bind="foreach: interestingPlaces">
+			<div style="background-color:white; margin-left:10px; margin-right:10px; margin-bottom:10px;">
+				<div data-bind="text: name"></div>
+				<div data-bind="text: rating"></div>
+				<hr>
+			</div>
+		</div>
 
 		<script src="bower_components/knockout/dist/knockout.js"></script>
 		<script src="bower_components/jquery/dist/jquery.min.js"></script>

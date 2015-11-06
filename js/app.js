@@ -5,8 +5,19 @@ var ApplicationViewModel = function() {
 	var currentMarkers = [];
 	var defaultNeighborhood = "Moscow";
 	var myLatLng = {lat: -34.397, lng: 150.644};
+	var places = [];
 
+	self.interestingPlaces = ko.observableArray([]);
 	self.neighborhood = ko.observable(defaultNeighborhood);
+
+
+	ko.observableArray.fn.pushAll = function(valuesToPush) {
+		var underlyingArray = this();
+		this.valueWillMutate();
+		ko.utils.arrayPushAll(underlyingArray, valuesToPush);
+		this.valueHasMutated();
+		return this;  //optional
+	};
 
 	var initMap = function() {
 		// Create a map object and specify the DOM element for display.
@@ -99,8 +110,14 @@ var ApplicationViewModel = function() {
 				var url = item.venue.canonicalUrl;
 
 				var loc = new Location(latitude, longtitude, name, caption, photo, address, rating, url);
+				places.push(loc);
+
 				addMarkerToMap(loc);
 			});
+
+
+			self.interestingPlaces.pushAll(places);
+
 		}
 	}
 
@@ -113,12 +130,15 @@ var ApplicationViewModel = function() {
 
 	self.computedMarkers = ko.computed(function() {
 		if (self.neighborhood() !== '') {
+
 			clearMarkers();
+			places = [];
+
 			var foursquareLink = 'https://api.foursquare.com/v2/search/recommendations?m=foursquare&near='+self.neighborhood()+'&oauth_token=MRX15WXU5C42TF0ZI12BNY4GFIFNBYFVMJWXITDDTOUFYIRL&v=20151103';
-			//var foursquareLink = 'https://api.foursquare.com/v2/venues/explore?near='+encodeURIComponent(self.neighborhood())+'&oauth_token=5WJZ5GSQURT4YEG251H42KKKOWUNQXS5EORP2HGGVO4B14AB&v=20151103';
+
 			$.getJSON(foursquareLink, foursquareRequestCompleted)
 			.fail(function() {})
-	    }
+		}
 	});
 
 
