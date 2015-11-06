@@ -9,14 +9,18 @@
       		#map { height: 100%; }
 		</style>
 		<link href="css/map.css" type="text/css" rel="stylesheet">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 	</head>
 	<body>
-		<div id="map">
-		</div>
+
+		<div id="map"></div>
+
 		<div class="search-bar">
 			<input class="search-area" data-bind="value:neighborhood">
 		</div>
-		
+
+		<div class="places"></div>
+
 		<script src="bower_components/knockout/dist/knockout.js"></script>
 		<script src="bower_components/jquery/dist/jquery.min.js"></script>
 		<script src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>

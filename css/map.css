@@ -23,3 +23,24 @@
 	box-sizing: border-box;
 	outline: 0;
 }
+
+.img {
+	margin: 10px;
+	display:inline-block;
+}
+
+.contacts {
+	margin: 10px;
+	display:inline-block;
+	line-height: 20px;
+}
+
+
+.places {
+	max-width: 300px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+	z-index: 102;
+	position: fixed;
+	top: 15px;
+	right: 15px;
+}
