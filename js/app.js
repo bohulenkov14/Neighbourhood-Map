@@ -1,145 +1,192 @@
 var ApplicationViewModel = function() {
-	var self = this;
-	var map;
-	var currentOpenedInfowindow;
-	var currentMarkers = [];
-	var defaultNeighborhood = "Moscow";
-	var myLatLng = {lat: -34.397, lng: 150.644};
-	var places = [];
+  var self = this;
+  var map;
+  var currentOpenedInfowindow;
+  var currentMarkers = [];
+  var defaultNeighborhood = "Moscow";
+  var myLatLng = {lat: -34.397, lng: 150.644};
+  var places = [];
 
-	self.interestingPlaces = ko.observableArray([]);
-	self.neighborhood = ko.observable(defaultNeighborhood);
+  self.filterInput = ko.observable("");
+  self.neighborhood = ko.observable(defaultNeighborhood);
+  self.interestingPlaces = ko.observableArray([]);
+  self.availableNeighborhoods = ko.observableArray([
+    "Moscow",
+    "New York",
+    "Tokyo",
+    "San Francisco",
+    "St. Petersburg",
+    "Paris",
+    "Hong Kong",
+    "Pekin",
+    "Berlin"
+  ]);
 
+  self.changeNeighborhood = function() {
+    self.filterInput("");
 
-	ko.observableArray.fn.pushAll = function(valuesToPush) {
-		var underlyingArray = this();
-		this.valueWillMutate();
-		ko.utils.arrayPushAll(underlyingArray, valuesToPush);
-		this.valueHasMutated();
-		return this;  //optional
-	};
+  };
 
-	var initMap = function() {
-		// Create a map object and specify the DOM element for display.
-		map = new google.maps.Map(document.getElementById('map'), {
-			center: myLatLng,
-			zoom: 8,
-			mapTypeControl: false,
-			streetViewControl: false
-		});
-	}
+  ko.observableArray.fn.pushAll = function(valuesToPush) {
+    var underlyingArray = this();
+    this.valueWillMutate();
+    ko.utils.arrayPushAll(underlyingArray, valuesToPush);
+    this.valueHasMutated();
+    return this;  //optional
+  };
 
-	var addMarkerToMap = function(location) {
+  var initMap = function() {
+    // Create a map object and specify the DOM element for display.
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: myLatLng,
+      zoom: 8,
+      mapTypeControl: false,
+      streetViewControl: false
+    });
+  }
 
-		var marker = new google.maps.Marker({
-			position: { lat:location.lantitude , lng:location.longtitide },
-			map: map
-		});
+  var addMarkerToMap = function(location) {
 
-		var img;
-		if (location.thumbnail !== '')
-			img = '<img src="' + location.thumbnail + '" class="thumbnail">';
-		else
-			img = '';
+    var marker = new google.maps.Marker({
+      position: { lat:location.lantitude , lng:location.longtitide },
+      map: map
+    });
 
-		var contentString = '<div id="content">'+
-			'<h2>' + location.name + '</h2>' +
-			'<div class="img-contacts">'+
-			'<div class="img">' +
-			img +
-			'</div>' +
-			'<div class="contacts">' +
-			'<div><span style="font-weight:bold;" class="adress">Address: </span>' + location.address + '</div>' +
-			'<div><span style="font-weight:bold;" class="twitter">Rating: </span>' + location.rating + '</div>' +
-			'<div><a class="fa fa-foursquare" href="'+ location.foursquareLink + '"></a></div>' +
-			'</div>' +
-			'</div>' +
-			'<p>' + location.caption + '</p>'+
-			'</div>';
+    var img;
+    if (location.thumbnail !== '')
+      img = '<img src="' + location.thumbnail + '" class="thumbnail">';
+    else
+      img = '';
 
-		var infowindow = new google.maps.InfoWindow({
-			content: contentString
-		});
+    var contentString =
+    '<div id="content">'+
+      '<h2>' + location.name + '</h2>' +
+      '<div class="img-contacts">'+
+        '<div class="img">' + img + '</div>' +
+        '<div class="contacts">' +
+          '<div><span style="font-weight:bold;" class="adress">Address: </span>' + location.formattedAddress + '</div>' +
+          '<div><span style="font-weight:bold;" class="twitter">Rating: </span>' + location.rating + '</div>' +
+          '<div><a class="fa fa-foursquare" href="'+ location.foursquareLink + '"></a></div>' +
+        '</div>' +
+      '</div>' +
+      '<p>' + location.caption + '</p>'+
+    '</div>';
 
-		marker.addListener('click', (function(infWnd ) {
-			return function() {
-				if (currentOpenedInfowindow)
-					currentOpenedInfowindow.close();
-				infWnd.open(map, marker);
-				currentOpenedInfowindow = infWnd;
-			};
-		})(infowindow));
+    var infowindow = new google.maps.InfoWindow({
+      content: contentString
+    });
 
-		currentMarkers.push(marker);
-	}
-	initMap();
+    marker.addListener('click', (function(infWnd ) {
+      return function() {
+        if (currentOpenedInfowindow)
+          currentOpenedInfowindow.close();
+          infWnd.open(map, marker);
+          currentOpenedInfowindow = infWnd;
+      };
+    })(infowindow));
 
-	var foursquareRequestCompleted = function( data ) {
+    currentMarkers.push(marker);
+  }
+  initMap();
 
-		var results = data.response.group.results;
-		if (results) {
-			if (results.length > 0) {
-				var targetIndex = Math.floor(results.length/2);
-				var target = results[targetIndex];
-				var mapZoom = { lat: target.venue.location.lat, lng: target.venue.location.lng };
-				map.setZoom(10);
-				map.panTo(mapZoom);
-			}
+  var foursquareRequestCompleted = function( data ) {
 
-			results.forEach(function( item ) {
-				var latitude = item.venue.location.lat;
-				var longtitude = item.venue.location.lng;
-				var name = item.venue.name;
-				var caption;
-				if (item.snippets.items.length > 0 &&
-					item.snippets.items[0].hasOwnProperty('detail') &&
-					item.snippets.items[0].detail.hasOwnProperty('object') &&
-					item.snippets.items[0].detail.object.hasOwnProperty('text'))
-					caption = item.snippets.items[0].detail.object.text;
-				else
-					caption = '';
+    var results = data.response.group.results;
+    if (results) {
+      if (results.length > 0) {
+        var targetIndex = Math.floor(results.length/2);
+        var target = results[targetIndex];
+        var mapZoom = { lat: target.venue.location.lat, lng: target.venue.location.lng };
+        map.setZoom(10);
+        map.panTo(mapZoom);
+      }
 
-				var photo;
-				if (item.hasOwnProperty('photo'))
-					photo = item.photo.prefix + '100x100' + item.photo.suffix;
-				else
-					photo = '';
+      results.forEach(function( item ) {
+        var latitude = item.venue.location.lat;
+        var longtitude = item.venue.location.lng;
+        var name = item.venue.name;
+        var caption;
+        if (item.snippets.items.length > 0 &&
+          item.snippets.items[0].hasOwnProperty('detail') &&
+          item.snippets.items[0].detail.hasOwnProperty('object') &&
+          item.snippets.items[0].detail.object.hasOwnProperty('text'))
+          caption = item.snippets.items[0].detail.object.text;
+        else
+          caption = '';
 
-				var address = item.venue.location.formattedAddress[0];
-				var rating = item.venue.rating;
-				var url = item.venue.canonicalUrl;
+        var photo;
+        if (item.hasOwnProperty('photo'))
+          photo = item.photo.prefix + '100x100' + item.photo.suffix;
+        else
+          photo = '';
 
-				var loc = new Location(latitude, longtitude, name, caption, photo, address, rating, url);
-				places.push(loc);
+        var formattedAddress = item.venue.location.formattedAddress[0];
+        var address = item.venue.location.address;
+        var rating = item.venue.rating;
+        var url = item.venue.canonicalUrl;
 
-				addMarkerToMap(loc);
-			});
+        var loc = new Location(latitude, longtitude, name, caption, photo, formattedAddress, address, rating, url);
+        places.push(loc);
 
+        addMarkerToMap(loc);
+      });
 
-			self.interestingPlaces.pushAll(places);
+      self.interestingPlaces.removeAll();
+      self.interestingPlaces.pushAll(places);
 
-		}
-	}
+    }
+  }
 
-	var clearMarkers = function() {
-		for ( var i = 0; i < currentMarkers.length; ++i ) {
-			currentMarkers[i].setMap(null);
-		}
-		currentMarkers.length = 0;
-	}
+  var clearMarkers = function() {
+    for ( var i = 0; i < currentMarkers.length; ++i ) {
+      currentMarkers[i].setMap(null);
+    }
+    currentMarkers.length = 0;
+  }
 
-	self.computedMarkers = ko.computed(function() {
-		if (self.neighborhood() !== '') {
+  self.processNewNeighborhood = function() {
+    clearMarkers();
+    places = [];
 
-			clearMarkers();
-			places = [];
+    var foursquareLink = 'https://api.foursquare.com/v2/search/recommendations?m=foursquare&near='+self.neighborhood()+'&oauth_token=MRX15WXU5C42TF0ZI12BNY4GFIFNBYFVMJWXITDDTOUFYIRL&v=20151103';
 
-			var foursquareLink = 'https://api.foursquare.com/v2/search/recommendations?m=foursquare&near='+self.neighborhood()+'&oauth_token=MRX15WXU5C42TF0ZI12BNY4GFIFNBYFVMJWXITDDTOUFYIRL&v=20151103';
+    $.getJSON(foursquareLink, foursquareRequestCompleted)
+    .fail(function() {})
+  }
 
-			$.getJSON(foursquareLink, foursquareRequestCompleted)
-			.fail(function() {})
-		}
-	});
+  self.computedMarkers = ko.computed(function() {
+    if (self.neighborhood() !== '') {
+      self.processNewNeighborhood();
+    }
+  });
+
+  self.filter = ko.computed(function() {
+
+    var filteredPlaces = [];
+    var inp = self.filterInput();
+    if (self.filterInput() === "") {
+      filteredPlaces = places;
+      self.interestingPlaces.removeAll();
+      self.interestingPlaces.pushAll(places);
+    } else {
+
+      for (var i = 0; i < places.length; i++) {
+        var lowercaseName = places[i].name.toLowerCase();
+        var lowercaseFilter = self.filterInput().toLowerCase();
+        if (lowercaseName.search(lowercaseFilter) !== -1) {
+          filteredPlaces.push(places[i]);
+        }
+      }
+    }
+
+    self.interestingPlaces.removeAll();
+    self.interestingPlaces.pushAll(filteredPlaces);
+
+    clearMarkers();
+    for (var i = 0; i < filteredPlaces.length; ++i) {
+      addMarkerToMap(filteredPlaces[i]);
+    }
+  })
 
 
 
