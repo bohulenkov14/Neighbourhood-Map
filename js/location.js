@@ -8,4 +8,5 @@ var Location = function(latitude, longtitude, name, caption, thumbnail, formatte
   this.formattedAddress = formattedAddress;
   this.rating = rating;
   this.foursquareLink = foursquareLink;
+  this.openAssociatedInfoWindow = function () {};
 }

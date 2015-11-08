@@ -2,31 +2,31 @@ var ApplicationViewModel = function() {
   var self = this;
   var map;
   var currentOpenedInfowindow;
+  var currentOpenedMarker;
   var currentMarkers = [];
-  var defaultNeighborhood = "Moscow";
-  var myLatLng = {lat: -34.397, lng: 150.644};
+  var defaultNeighborhood = 'Moscow';
+  var myLatLng = {lat: 55.751244, lng: 37.618423};
   var places = [];
 
-  self.filterInput = ko.observable("");
+  self.filterInput = ko.observable('');
   self.neighborhood = ko.observable(defaultNeighborhood);
   self.interestingPlaces = ko.observableArray([]);
   self.availableNeighborhoods = ko.observableArray([
-    "Moscow",
-    "New York",
-    "Tokyo",
-    "San Francisco",
-    "St. Petersburg",
-    "Paris",
-    "Hong Kong",
-    "Pekin",
-    "Berlin"
+    'Moscow',
+    'New York',
+    'Tokyo',
+    'San Francisco',
+    'St. Petersburg',
+    'Paris',
+    'Hong Kong',
+    'Pekin',
+    'Berlin'
   ]);
 
-  self.changeNeighborhood = function() {
-    self.filterInput("");
-
-  };
-
+  /**
+  * @description This method is used for pushing array of values to observable array, taken from http://stackoverflow.com/questions/23606541/observable-array-push-multiple-objects-in-knockout-js
+  * @param {array} valuesToPush - Array of values to push to observable array
+  */
   ko.observableArray.fn.pushAll = function(valuesToPush) {
     var underlyingArray = this();
     this.valueWillMutate();
@@ -35,6 +35,10 @@ var ApplicationViewModel = function() {
     return this;  //optional
   };
 
+
+  /**
+  * @description Google maps initializer
+  */
   var initMap = function() {
     // Create a map object and specify the DOM element for display.
     map = new google.maps.Map(document.getElementById('map'), {
@@ -43,8 +47,12 @@ var ApplicationViewModel = function() {
       mapTypeControl: false,
       streetViewControl: false
     });
-  }
+  };
 
+  /**
+  * @description Construction of InfoWindow content from location object and adding corresponding marker to map
+  * @param {Location} location - Location object, containing necessary info about place
+  */
   var addMarkerToMap = function(location) {
 
     var marker = new google.maps.Marker({
@@ -52,43 +60,112 @@ var ApplicationViewModel = function() {
       map: map
     });
 
+    //When thumbnail image is present in response - show it in InfoWindow
     var img;
     if (location.thumbnail !== '')
       img = '<img src="' + location.thumbnail + '" class="thumbnail">';
     else
       img = '';
 
+    //Template for InfoWindow
     var contentString =
     '<div id="content">'+
-      '<h2>' + location.name + '</h2>' +
+      '<h2 class="bold-header">' + location.name + '</h2>' +
       '<div class="img-contacts">'+
         '<div class="img">' + img + '</div>' +
         '<div class="contacts">' +
-          '<div><span style="font-weight:bold;" class="adress">Address: </span>' + location.formattedAddress + '</div>' +
-          '<div><span style="font-weight:bold;" class="twitter">Rating: </span>' + location.rating + '</div>' +
+          '<div>' +
+            '<span class="bold-header">Address: </span>' +
+            '<span class="text">' + location.formattedAddress + '</span>' +
+          '</div>' +
+          '<div>' +
+            '<span class="bold-header">Rating: </span>' +
+            '<span class="text">' + location.rating + '</span>' +
+          '</div>' +
           '<div><a class="fa fa-foursquare" href="'+ location.foursquareLink + '"></a></div>' +
         '</div>' +
       '</div>' +
-      '<p>' + location.caption + '</p>'+
+      '<p class="text">' + location.caption + '</p>'+
     '</div>';
 
     var infowindow = new google.maps.InfoWindow({
       content: contentString
     });
 
-    marker.addListener('click', (function(infWnd ) {
+
+    google.maps.event.addListener(infowindow, 'closeclick', function() {
+      for (var i = 0; i < currentMarkers.length; ++i)
+          currentMarkers[i].setAnimation(null);
+    });
+
+    //Callback function for click event for list items and markers
+    var openFunc = (function(infWnd, marker) {
       return function() {
-        if (currentOpenedInfowindow)
+
+        for (var i = 0; i < currentMarkers.length; ++i)
+          currentMarkers[i].setAnimation(null);
+
+        if (currentOpenedInfowindow && currentMarkers !== null)
           currentOpenedInfowindow.close();
           infWnd.open(map, marker);
+
           currentOpenedInfowindow = infWnd;
+          currentOpenedMarker = marker;
+
+          var anim = marker.getAnimation();
+          if (anim) {
+            marker.setAnimation(null);
+          } else {
+            marker.setAnimation(google.maps.Animation.BOUNCE);
+          }
       };
-    })(infowindow));
+    })(infowindow, marker);
+
+    marker.addListener('click', openFunc);
+
+    //save callback function to location object for further usage with list of places
+    location.openAssociatedInfoWindow = openFunc;
 
     currentMarkers.push(marker);
-  }
-  initMap();
+  };
 
+  /**
+  * @description Construction of Location object from JSON response from Foursquare
+  * @param {object} data - JSON from Foursquare's response
+  */
+  var getLocationFromRequestData = function( data ) {
+    var latitude = data.venue.location.lat;
+    var longtitude = data.venue.location.lng;
+    var name = data.venue.name;
+    var caption;
+    if (data.snippets.items.length > 0 &&
+      data.snippets.items[0].hasOwnProperty('detail') &&
+      data.snippets.items[0].detail.hasOwnProperty('object') &&
+      data.snippets.items[0].detail.object.hasOwnProperty('text'))
+      caption = data.snippets.items[0].detail.object.text;
+    else
+      caption = '';
+
+    var photo;
+    if (data.hasOwnProperty('photo'))
+      photo = data.photo.prefix + '100x100' + data.photo.suffix;
+    else
+      photo = '';
+
+    var formattedAddress = data.venue.location.formattedAddress[0];
+    var address = data.venue.location.address;
+    var rating = data.venue.rating;
+    var url = data.venue.canonicalUrl;
+
+    var loc = new Location(latitude, longtitude, name, caption, photo, formattedAddress, address, rating, url);
+
+    return loc;
+  };
+
+  /**
+  * @description Callback for AJAX request to Foursquare
+  * @param {object} data - JSON from Foursquare's response
+  */
   var foursquareRequestCompleted = function( data ) {
 
     var results = data.response.group.results;
@@ -102,48 +179,37 @@ var ApplicationViewModel = function() {
       }
 
       results.forEach(function( item ) {
-        var latitude = item.venue.location.lat;
-        var longtitude = item.venue.location.lng;
-        var name = item.venue.name;
-        var caption;
-        if (item.snippets.items.length > 0 &&
-          item.snippets.items[0].hasOwnProperty('detail') &&
-          item.snippets.items[0].detail.hasOwnProperty('object') &&
-          item.snippets.items[0].detail.object.hasOwnProperty('text'))
-          caption = item.snippets.items[0].detail.object.text;
-        else
-          caption = '';
-
-        var photo;
-        if (item.hasOwnProperty('photo'))
-          photo = item.photo.prefix + '100x100' + item.photo.suffix;
-        else
-          photo = '';
-
-        var formattedAddress = item.venue.location.formattedAddress[0];
-        var address = item.venue.location.address;
-        var rating = item.venue.rating;
-        var url = item.venue.canonicalUrl;
-
-        var loc = new Location(latitude, longtitude, name, caption, photo, formattedAddress, address, rating, url);
+        var loc = getLocationFromRequestData( item );
         places.push(loc);
-
         addMarkerToMap(loc);
       });
 
       self.interestingPlaces.removeAll();
       self.interestingPlaces.pushAll(places);
-
     }
-  }
+  };
 
+  /**
+  * @description Clear all markers from map
+  */
   var clearMarkers = function() {
     for ( var i = 0; i < currentMarkers.length; ++i ) {
       currentMarkers[i].setMap(null);
     }
     currentMarkers.length = 0;
-  }
+  };
 
+
+  /**
+  * @description Event callback for clearing filter on neighborhood change event
+  */
+  self.changeNeighborhood = function() {
+    self.filterInput("");
+  };
+
+  /**
+  * @description Create AJAX request to Foursquare to fetch interesting location for current neighborhood
+  */
   self.processNewNeighborhood = function() {
     clearMarkers();
     places = [];
@@ -152,22 +218,32 @@ var ApplicationViewModel = function() {
 
     $.getJSON(foursquareLink, foursquareRequestCompleted)
     .fail(function() {})
-  }
+  };
 
+  /**
+  * @description Computed property for getting interesting places for new neighborhood
+  */
   self.computedMarkers = ko.computed(function() {
     if (self.neighborhood() !== '') {
       self.processNewNeighborhood();
     }
   });
 
+
+  /**
+  * @description Computed property for filtering locations for current neighborhood
+  */
   self.filter = ko.computed(function() {
 
     var filteredPlaces = [];
     var inp = self.filterInput();
+
+    //If filter string is empty - show all places for current neighborhood
     if (self.filterInput() === "") {
       filteredPlaces = places;
       self.interestingPlaces.removeAll();
       self.interestingPlaces.pushAll(places);
+
     } else {
 
       for (var i = 0; i < places.length; i++) {
@@ -186,10 +262,11 @@ var ApplicationViewModel = function() {
     for (var i = 0; i < filteredPlaces.length; ++i) {
       addMarkerToMap(filteredPlaces[i]);
     }
-  })
+  });
 
 
 
+  initMap();
 }
 
 // initialize the view model binding
