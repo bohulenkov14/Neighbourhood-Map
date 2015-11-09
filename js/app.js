@@ -9,6 +9,7 @@ var ApplicationViewModel = function() {
   var places = [];
 
   self.filterInput = ko.observable('');
+  self.errorsHappened = ko.observable(false);
   self.neighborhood = ko.observable(defaultNeighborhood);
   self.interestingPlaces = ko.observableArray([]);
   self.availableNeighborhoods = ko.observableArray([
@@ -39,7 +40,7 @@ var ApplicationViewModel = function() {
   /**
   * @description Google maps initializer
   */
-  var initMap = function() {
+  self.initMap = function() {
     // Create a map object and specify the DOM element for display.
     map = new google.maps.Map(document.getElementById('map'), {
       center: myLatLng,
@@ -63,7 +64,7 @@ var ApplicationViewModel = function() {
     //When thumbnail image is present in response - show it in InfoWindow
     var img;
     if (location.thumbnail !== '')
-      img = '<img src="' + location.thumbnail + '" class="thumbnail">';
+      img = '<img src="' + location.thumbnail + '" class="thumb">';
     else
       img = '';
 
@@ -118,6 +119,9 @@ var ApplicationViewModel = function() {
           } else {
             marker.setAnimation(google.maps.Animation.BOUNCE);
           }
+
+          var latLng = marker.getPosition();
+          map.setCenter(latLng);
       };
     })(infowindow, marker);
 
@@ -217,7 +221,9 @@ var ApplicationViewModel = function() {
     var foursquareLink = 'https://api.foursquare.com/v2/search/recommendations?m=foursquare&near='+self.neighborhood()+'&oauth_token=MRX15WXU5C42TF0ZI12BNY4GFIFNBYFVMJWXITDDTOUFYIRL&v=20151103';
 
     $.getJSON(foursquareLink, foursquareRequestCompleted)
-    .fail(function() {})
+    .fail(function() {
+      self.errorsHappened(true)
+    });
   };
 
   /**
@@ -235,7 +241,7 @@ var ApplicationViewModel = function() {
   */
   self.filter = ko.computed(function() {
 
-    var filteredPlaces = [];
+    var filteredPlaces = [{}];
     var inp = self.filterInput();
 
     //If filter string is empty - show all places for current neighborhood
@@ -259,17 +265,18 @@ var ApplicationViewModel = function() {
     self.interestingPlaces.pushAll(filteredPlaces);
 
     clearMarkers();
-    for (var i = 0; i < filteredPlaces.length; ++i) {
+    for (var i = 1; i < filteredPlaces.length; ++i) {
       addMarkerToMap(filteredPlaces[i]);
     }
   });
-
-
-
-  initMap();
-}
+};
 
 // initialize the view model binding
-$(function() {
-  ko.applyBindings(new ApplicationViewModel());
+var viewModel = new ApplicationViewModel();
+ko.applyBindings(viewModel);
+
+
+$("#menu-toggle").click(function(e) {
+    e.preventDefault();
+    $("#wrapper").toggleClass("toggled");
 });
