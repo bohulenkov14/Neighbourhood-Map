@@ -50,6 +50,20 @@ var ApplicationViewModel = function() {
     });
   };
 
+  self.map_recenter = function(latlng,offsetx,offsety) {
+    var point1 = map.getProjection().fromLatLngToPoint(
+      (latlng instanceof google.maps.LatLng) ? latlng : map.getCenter()
+    );
+    var point2 = new google.maps.Point(
+      ( (typeof(offsetx) == 'number' ? offsetx : 0) / Math.pow(2, map.getZoom()) ) || 0,
+      ( (typeof(offsety) == 'number' ? offsety : 0) / Math.pow(2, map.getZoom()) ) || 0
+    );
+    map.setCenter(map.getProjection().fromPointToLatLng(new google.maps.Point(
+      point1.x - point2.x,
+      point1.y + point2.y
+    )));
+  };
+
   /**
   * @description Construction of InfoWindow content from location object and adding corresponding marker to map
   * @param {Location} location - Location object, containing necessary info about place
@@ -121,7 +135,7 @@ var ApplicationViewModel = function() {
           }
 
           var latLng = marker.getPosition();
-          map.setCenter(latLng);
+          self.map_recenter(latLng, 0, -150);
       };
     })(infowindow, marker);
 

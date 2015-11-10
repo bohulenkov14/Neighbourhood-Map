@@ -193,4 +193,32 @@ hr {
     font-size: 23px;
     color: red;
   }
+
+
+
+  .img {
+    display: none;
+  }
+
+  #content > h2 {
+    font-size: 20px;
+  }
+
+  #content > p {
+    display: none;
+  }
+}
+
+@media all and (orientation: landscape) and (max-width:768px){
+  #content {
+    max-width: 300px;
+    max-height: 125px;
+  }
+}
+
+@media all and (orientation: portrait){
+  #content {
+    max-width: 150px;
+    max-height: 300px;
+  }
 }
