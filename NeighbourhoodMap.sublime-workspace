@@ -3,6 +3,18 @@
 	{
 		"selected_items":
 		[
+			[
+				"font",
+				"font-size"
+			],
+			[
+				"backgr",
+				"background-color"
+			],
+			[
+				"text",
+				"text-align"
+			]
 		]
 	},
 	"buffers":
@@ -11,18 +23,71 @@
 			"file": "index.html",
 			"settings":
 			{
-				"buffer_size": 825,
+				"buffer_size": 2895,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "var ApplicationViewModel = function() {\n	var self = this;\n	var map;\n	var currentOpenedInfowindow;\n	var currentMarkers = [];\n	var defaultNeighborhood = \"Moscow\";\n	var myLatLng = {lat: -34.397, lng: 150.644};\n	\n	self.neighborhood = ko.observable(defaultNeighborhood); \n\n	var initMap = function() {\n		// Create a map object and specify the DOM element for display.\n		map = new google.maps.Map(document.getElementById('map'), {\n			center: myLatLng,\n			zoom: 8,\n			mapTypeControl: false,\n			streetViewControl: false\n		});\n	}\n	\n	var addMarkerToMap = function(location) {\n  \n		var marker = new google.maps.Marker({\n			position: { lat:location.lantitude , lng:location.longtitide },\n			map: map\n		});\n		\n		var img;\n		if (location.thumbnail !== '')\n			img = '<img src=\"' + location.thumbnail + '\" class=\"thumbnail\">';\n		else\n			img = '';\n			\n		var contentString = '<div id=\"content\">'+\n			'<div id=\"siteNotice\">'+\n			'</div>'+\n			'<div id=\"bodyContent\">'+\n			'<h3>' + location.name + '</h3>' +\n			img +\n			'<p>' + location.caption + '</p>'+\n			'</div>'+\n			'</div>';\n			\n		var infowindow = new google.maps.InfoWindow({\n			content: contentString\n		});\n		\n		marker.addListener('click', (function(infWnd ) {\n			return function() {\n				if (currentOpenedInfowindow)\n					currentOpenedInfowindow.close();\n				infWnd.open(map, marker);\n				currentOpenedInfowindow = infWnd;\n			};\n		})(infowindow));\n		\n		currentMarkers.push(marker);\n	}\n	initMap();\n	\n	var foursquareRequestCompleted = function( data ) {\n		\n		var results = data.response.group.results;\n		if (results) {\n			if (results.length > 0) {\n				var targetIndex = Math.floor(results.length/2);\n				var target = results[targetIndex];\n				var mapZoom = { lat: target.venue.location.lat, lng: target.venue.location.lng };\n				map.setZoom(10);\n				map.panTo(mapZoom);\n			}\n			 \n			results.forEach(function( item ) {\n				var latitude = item.venue.location.lat;\n				var longtitude = item.venue.location.lng;\n				var name = item.venue.name;\n				var caption;\n				if (item.snippets.items.length > 0 && \n					item.snippets.items[0].hasOwnProperty('detail') &&\n					item.snippets.items[0].detail.hasOwnProperty('object') &&\n					item.snippets.items[0].detail.object.hasOwnProperty('text'))\n					caption = item.snippets.items[0].detail.object.text;\n				else\n					caption = '';\n				\n				var photo;\n				if (item.hasOwnProperty('photo'))\n					photo = item.photo.prefix + '100x100' + item.photo.suffix;\n				else\n					photo = '';\n				\n	\n				var loc = new Location(latitude, longtitude, name, caption, photo);\n				addMarkerToMap(loc);\n			});\n		}\n	} \n	\n	var clearMarkers = function() {\n		for ( var i = 0; i < currentMarkers.length; ++i ) {\n			currentMarkers[i].setMap(null);\n		}\n		currentMarkers.length = 0;\n	}\n	\n	self.computedMarkers = ko.computed(function() {\n		if (self.neighborhood() !== '') {\n			clearMarkers();\n			var foursquareLink = 'https://api.foursquare.com/v2/search/recommendations?m=foursquare&near='+self.neighborhood()+'&oauth_token=MRX15WXU5C42TF0ZI12BNY4GFIFNBYFVMJWXITDDTOUFYIRL&v=20151103';\n			//var foursquareLink = 'https://api.foursquare.com/v2/venues/explore?near='+encodeURIComponent(self.neighborhood())+'&oauth_token=5WJZ5GSQURT4YEG251H42KKKOWUNQXS5EORP2HGGVO4B14AB&v=20151103'; \n			$.getJSON(foursquareLink, foursquareRequestCompleted)\n			.fail(function() {})\n	    }\n	});\n\n	\n\n}\n\n// initialize the view model binding\n$(function() {\n  ko.applyBindings(new ApplicationViewModel());\n});\n",
-			"file": "js/app.js",
-			"file_size": 3432,
-			"file_write_time": 130910383070000000,
+			"file": "css/map.css",
 			"settings":
 			{
-				"buffer_size": 3431,
+				"buffer_size": 3265,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "css/simple-sidebar.css",
+			"settings":
+			{
+				"buffer_size": 2212,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "js/app.js",
+			"settings":
+			{
+				"buffer_size": 9056,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/bohulenkov.a/Downloads/neighborhood-map-master/dev/js/app.js",
+			"settings":
+			{
+				"buffer_size": 15031,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/C/Users/bohulenkov.a/Downloads/neighborhood-map-master/dev/js/config.js",
+			"settings":
+			{
+				"buffer_size": 1128,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/C/Users/bohulenkov.a/Downloads/neighborhood-map-master/dev/js/loadGoogleMapScriptAsync.js",
+			"settings":
+			{
+				"buffer_size": 1049,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/C/Users/bohulenkov.a/Downloads/neighborhood-map-master/dev/js/viewModels/venue.js",
+			"settings":
+			{
+				"buffer_size": 4544,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/C/Users/bohulenkov.a/Downloads/neighborhood-map-master/index.html",
+			"settings":
+			{
+				"buffer_size": 3315,
 				"line_ending": "Unix"
 			}
 		},
@@ -30,27 +95,16 @@
 			"file": "js/location.js",
 			"settings":
 			{
-				"buffer_size": 207,
-				"line_ending": "Unix"
+				"buffer_size": 447,
+				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "js/maps.js",
-			"settings":
-			{
-				"buffer_size": 1188,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "{\n  \"name\": \"Neighborhood_Map\",\n  \"homepage\": \"https://github.com/bohulenkov14/Neighbourhood_Map\",\n  \"description\": \"Google map integration project\",\n  \"main\": \"index.html\",\n  \"moduleType\": [],\n  \"keywords\": [\n    \"udacity\",\n    \"knockout\",\n    \"google\",\n    \"maps\"\n  ],\n  \"authors\": [\n    \"Bohulenkov A.S.\"\n  ],\n  \"license\": \"MIT\",\n  \"private\": true,\n  \"ignore\": [\n    \"**/.*\",\n    \"node_modules\",\n    \"bower_components\",\n    \"test\",\n    \"tests\"\n  ],\n  \"dependencies\": {\n    \"knockout\": \"~3.3.0\",\n    \"jquery\": \"~2.1.4\"\n  }\n}\n",
 			"file": "bower.json",
-			"file_size": 527,
-			"file_write_time": 130908792600000000,
 			"settings":
 			{
 				"buffer_size": 527,
-				"line_ending": "Unix"
+				"line_ending": "Windows"
 			}
 		}
 	],
@@ -86,11 +140,19 @@
 	},
 	"expanded_folders":
 	[
-		"/Users/artembohulenkov/Desktop/udacity/Neighbourhood_Map",
-		"/Users/artembohulenkov/Desktop/udacity/Neighbourhood_Map/js"
+		"/C/Users/bohulenkov.a/Documents/My Web Sites/Neighbourhood_Map",
+		"/C/Users/bohulenkov.a/Documents/My Web Sites/Neighbourhood_Map/css",
+		"/C/Users/bohulenkov.a/Documents/My Web Sites/Neighbourhood_Map/js"
 	],
 	"file_history":
 	[
+		"/C/Users/bohulenkov.a/Documents/My Web Sites/Neighbourhood_Map/index3.html",
+		"/C/Users/bohulenkov.a/Documents/My Web Sites/Neighbourhood_Map/js/app.js",
+		"/C/Users/bohulenkov.a/AppData/Roaming/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/C/Users/bohulenkov.a/AppData/Roaming/Sublime Text 3/Packages/User/HTML.sublime-settings",
+		"/C/Users/bohulenkov.a/AppData/Roaming/Sublime Text 3/Packages/Default/Preferences.sublime-settings",
+		"/C/Users/bohulenkov.a/AppData/Roaming/Sublime Text 3/Packages/Default/Preferences2.sublime-settings",
+		"/C/Users/bohulenkov.a/Documents/My Web Sites/Neighbourhood_Map/js/maps.js",
 		"/Users/artembohulenkov/Library/Application Support/Sublime Text 3/Packages/User/Preferences.sublime-settings",
 		"/Users/artembohulenkov/Library/Application Support/Sublime Text 3/Packages/Default/Preferences.sublime-settings",
 		"/Users/artembohulenkov/Library/Application Support/Sublime Text 3/Packages/User/JSON.sublime-settings",
@@ -99,7 +161,7 @@
 	],
 	"find":
 	{
-		"height": 0.0
+		"height": 34.0
 	},
 	"find_in_files":
 	{
@@ -113,6 +175,20 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"VenueViewModel",
+			"location",
+			"map.",
+			"panTo",
+			"center",
+			"listAPIErrorMessage",
+			"menu-toggle",
+			"menu-toggle-list",
+			"thumbnail",
+			"page-content-wrapper",
+			"detect_indentation",
+			"tab_size",
+			"trim_trailing_white_space_on_save",
+			"draw_white_space"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -130,7 +206,7 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 1,
 			"sheets":
 			[
 				{
@@ -139,45 +215,99 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 825,
+						"buffer_size": 2895,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								498,
-								498
+								199,
+								199
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/HTML/HTML.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 105.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "css/map.css",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3265,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2912,
+								2912
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 2520.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
 					"type": "text"
 				},
 				{
-					"buffer": 1,
-					"file": "js/app.js",
+					"buffer": 2,
+					"file": "css/simple-sidebar.css",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3431,
+						"buffer_size": 2212,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								267,
-								267
+								2212,
+								2212
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 739.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "js/app.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9056,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3759,
+								3759
 							]
 						],
 						"settings":
@@ -185,6 +315,118 @@
 							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
 						},
 						"translation.x": 0.0,
+						"translation.y": 3589.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/C/Users/bohulenkov.a/Downloads/neighborhood-map-master/dev/js/app.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 15031,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3092,
+								3092
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 3735.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/C/Users/bohulenkov.a/Downloads/neighborhood-map-master/dev/js/config.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1128,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/C/Users/bohulenkov.a/Downloads/neighborhood-map-master/dev/js/loadGoogleMapScriptAsync.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1049,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "/C/Users/bohulenkov.a/Downloads/neighborhood-map-master/dev/js/viewModels/venue.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4544,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								545,
+								559
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": -0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
@@ -192,63 +434,65 @@
 					"type": "text"
 				},
 				{
-					"buffer": 2,
+					"buffer": 8,
+					"file": "/C/Users/bohulenkov.a/Downloads/neighborhood-map-master/index.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3315,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1964,
+								1983
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 180.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
 					"file": "js/location.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 207,
+						"buffer_size": 447,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								205,
-								205
+								447,
+								447
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 10,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
-					"file": "js/maps.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1188,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								338,
-								338
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
+					"buffer": 10,
 					"file": "bower.json",
 					"semi_transient": false,
 					"settings":
@@ -260,19 +504,21 @@
 						"selection":
 						[
 							[
-								307,
-								307
+								524,
+								524
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JSON.tmLanguage"
+							"syntax": "Packages/JavaScript/JSON.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 9,
 					"type": "text"
 				}
 			]
@@ -280,11 +526,11 @@
 	],
 	"incremental_find":
 	{
-		"height": 0.0
+		"height": 23.0
 	},
 	"input":
 	{
-		"height": 0.0
+		"height": 31.0
 	},
 	"layout":
 	{
@@ -317,7 +563,7 @@
 	"project": "NeighbourhoodMap.sublime-project",
 	"replace":
 	{
-		"height": 0.0
+		"height": 42.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -355,7 +601,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 150.0,
+	"side_bar_width": 256.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{

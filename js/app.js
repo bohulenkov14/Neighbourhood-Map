@@ -50,6 +50,12 @@ var ApplicationViewModel = function() {
     });
   };
 
+  /**
+  * @description Method for centering map relative to geo point with x and y offset in pixels. Code taken from http://stackoverflow.com/questions/3473367/how-to-offset-the-center-of-a-google-maps-api-v3-in-pixels
+  * @param {object} latlng - object, containing latitude and longtitude of location
+  * @param {int} offsetx - offset in pixels by x coordinate of screen
+  * @param {int} offsety - offset in pixels by y coordinate of screen
+  */
   self.map_recenter = function(latlng,offsetx,offsety) {
     var point1 = map.getProjection().fromLatLngToPoint(
       (latlng instanceof google.maps.LatLng) ? latlng : map.getCenter()
